@@ -15,7 +15,7 @@
 		::include(file);
 	}
 
-	::WorldParameters.Mod.Registry.addModSource(::MSU.System.Registry.ModSourceDomain.GitHub, "https://github.com/Enduriel/Battle-Brothers-EIMO");
+	::WorldParameters.Mod.Registry.addModSource(::MSU.System.Registry.ModSourceDomain.GitHub, "https://github.com/Enduriel/BB-World-Parameters");
 	::WorldParameters.Mod.Registry.setUpdateSource(::MSU.System.Registry.ModSourceDomain.GitHub);
 	::WorldParameters.Mod.Registry.addModSource(::MSU.System.Registry.ModSourceDomain.NexusMods, "https://www.nexusmods.com/battlebrothers/mods/732");
 

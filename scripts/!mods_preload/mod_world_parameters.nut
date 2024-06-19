@@ -1,7 +1,7 @@
 ::WorldParameters <- {
 	ID = "mod_world_parameters",
 	Name = "World Parameters",
-	Version = "0.1.0"
+	Version = "1.0.0"
 }
 ::WorldParameters.MH <- ::Hooks.register(::WorldParameters.ID, ::WorldParameters.Version, ::WorldParameters.Name);
 ::WorldParameters.MH.require("mod_msu");

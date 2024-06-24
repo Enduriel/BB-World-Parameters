@@ -4,7 +4,7 @@
 	Version = "1.0.0"
 }
 ::WorldParameters.MH <- ::Hooks.register(::WorldParameters.ID, ::WorldParameters.Version, ::WorldParameters.Name);
-::WorldParameters.MH.require("mod_msu");
+::WorldParameters.MH.require("mod_msu >= 1.3.0");
 ::WorldParameters.MH.conflictWith("mod_legends [Legends uses its own custom world generation system and settings]");
 
 

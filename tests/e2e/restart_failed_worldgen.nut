@@ -14,10 +14,12 @@
 //   PROBE start 1 globals restored = true
 //   PROBE main menu shown after start 1 = true
 //   PROBE finish 1: World.State = null, EntityManager and FactionManager = null null,
-//     Stash global left = false, loading screen visible = false, main menu visible = true
+//     Stash global left = false, main menu visible = true
+//   PROBE menu 1: loading screen hidden = true, main menu visible = true, input permitted = true,
+//     MSU popup visible = true (the original game; headless there is no popup to show)
 //   PROBE start 2 = returned to the main menu, with the same finish 2 lines
 //   PROBE start 3 = in the world, PROBE start 3 player = true
-//   PROBE world after 3s: loading screen visible = false, world state = true, main menu visible = false
+//   PROBE world: loading screen hidden = true, world state = true, main menu visible = false
 //   PROBE restart test = done
 // and the log has "World Parameters: the new campaign couldn't be started, returning to the main menu.
 // There is no room left for the noble houses' fortresses ..." for start 1 and "... Generating the world

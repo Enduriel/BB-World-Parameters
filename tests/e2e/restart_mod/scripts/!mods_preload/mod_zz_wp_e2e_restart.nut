@@ -12,7 +12,7 @@
 //   2. the default settings plus a settlement group whose script doesn't exist: an error World Parameters
 //      doesn't predict, the generic message with the error text;
 //   3. the default settings: a normal campaign;
-// - 3 s into the world: whether it runs normally, then ::ClaudeProbe.done() when present.
+// - once the world's loading screen is gone: whether it runs normally, then ::ClaudeProbe.done() when present.
 // setUpCycle() applies step 1. The first campaign is started by restart_failed_worldgen.nut (original
 // game, menu mode) or by world_fights itself (modern engine, --settings settings/restart_cycle.nut).
 
@@ -78,6 +78,46 @@
 		];
 	}
 
+	// A player can only use the menu once the loading screen is gone (main_menu_state.isKeyInputPermitted),
+	// and LoadingScreen.show() does nothing while it is still visible or animating. So wait for that, as
+	// the player would, then check the menu and the popup and start the next campaign of the cycle.
+	function whenMenuUsable( _n, _waited ) {
+		if ((::LoadingScreen.isVisible() || ::LoadingScreen.isAnimating()) && _waited < 30000) {
+			::Time.scheduleEvent(::TimeUnit.Real, 250, @(_) ::WPE2E.whenMenuUsable(_n, _waited + 250), null);
+			return;
+		}
+		this.check("menu " + _n + ": loading screen hidden", @() !::LoadingScreen.isVisible() && !::LoadingScreen.isAnimating());
+		this.p("menu " + _n + ": waited for the loading screen (timing)", _waited + " ms");
+		this.check("menu " + _n + ": main menu visible", @() ::RootState.get("MainMenuState").isVisible() && ::RootState.get("MainMenuState").m.MainMenuScreen.isVisible());
+		this.check("menu " + _n + ": input permitted", @() ::RootState.get("MainMenuState").isKeyInputPermitted());
+		this.check("menu " + _n + ": MSU popup visible", @() ::MSU.Popup.isVisible());
+		if (this.Next.len() == 0) {
+			this.done();
+			return;
+		}
+		::Time.scheduleEvent(::TimeUnit.Real, 1000, function( _ ) {
+			if (::MSU.Popup.isVisible()) ::MSU.Popup.hide(); // the player closes the message
+			::WPE2E.Next.remove(0)();
+			::WPE2E.p("restart", "starting campaign " + (::WPE2E.Starts + 1));
+			::WPE2E.startCampaign(::WPE2E.Seed);
+		}, null);
+	}
+
+	// The world shows once its loading screen is gone. A worldgen frame is long, so a timer started in init
+	// can fire at once: poll for the loading screen instead, as whenMenuUsable does.
+	function whenWorldShown( _waited ) {
+		if ((::LoadingScreen.isVisible() || ::LoadingScreen.isAnimating()) && _waited < 30000) {
+			::Time.scheduleEvent(::TimeUnit.Real, 250, @(_) ::WPE2E.whenWorldShown(_waited + 250), null);
+			return;
+		}
+		this.check("world: loading screen hidden", @() !::LoadingScreen.isVisible() && !::LoadingScreen.isAnimating());
+		this.p("world: waited for the loading screen (timing)", _waited + " ms");
+		this.check("world: world state", @() ::RootState.get("WorldState") != null && ::World.State != null);
+		this.check("world: main menu visible", @() ::RootState.get("MainMenuState").isVisible());
+		this.check("world: days", @() ::World.getTime().Days);
+		this.done();
+	}
+
 	function resetWorldParametersSettings() {
 		foreach (setting in ::WorldParameters.Mod.ModSettings.getAllElementsAsArray(@(_key, _e) "IsSetting" in _e.Data)) {
 			setting.set(setting.BaseValue, false, false);
@@ -110,13 +150,7 @@ mod.queue(">mod_world_parameters", ">mod_msu", function() {
 			::WPE2E.check("start " + n + " settlements", @() ::World.EntityManager.getSettlements().len());
 			::WPE2E.check("start " + n + " highest faction id", @() ::World.FactionManager.m.Factions.len() - 1);
 			::WPE2E.check("start " + n + " player", @() ::World.State.getPlayer() != null);
-			::Time.scheduleEvent(::TimeUnit.Real, 3000, function( _ ) {
-				::WPE2E.check("world after 3s: loading screen visible", @() ::LoadingScreen.isVisible());
-				::WPE2E.check("world after 3s: world state", @() ::RootState.get("WorldState") != null && ::World.State != null);
-				::WPE2E.check("world after 3s: main menu visible", @() ::RootState.get("MainMenuState").isVisible());
-				::WPE2E.check("world after 3s: days", @() ::World.getTime().Days);
-				::WPE2E.done();
-			}, null);
+			::WPE2E.whenWorldShown(0);
 		}
 
 		q.onFinish = @(__original) function() {
@@ -128,12 +162,8 @@ mod.queue(">mod_world_parameters", ">mod_msu", function() {
 			::WPE2E.check("finish " + n + ": loading screen visible", @() ::LoadingScreen.isVisible());
 			::WPE2E.check("finish " + n + ": main menu visible", @() ::RootState.get("MainMenuState").isVisible());
 			::WPE2E.check("finish " + n + ": MSU popup visible", @() ::MSU.Popup.isVisible());
-			if (this.m.ExitGame && ::WPE2E.Next.len() != 0) {
-				::Time.scheduleEvent(::TimeUnit.Real, 1000, function( _ ) {
-					::WPE2E.Next.remove(0)();
-					::WPE2E.p("restart", "starting campaign " + (::WPE2E.Starts + 1));
-					::WPE2E.startCampaign(::WPE2E.Seed);
-				}, null);
+			if (this.m.ExitGame) {
+				::WPE2E.whenMenuUsable(n, 0);
 			}
 		}
 	});

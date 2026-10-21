@@ -7,6 +7,9 @@
 #   determinism.sh OUTDIR WP_ZIP [NAME...]      (default names: lfoj fewer factions9)
 #
 # Prints one line per settings name, "same" or "DIFFERENT", and exits 1 if any differ.
+# Original game (2026-10-21): two campaign runs of worldgen_report.nut --setup settings/lfoj.nut at seed
+# VUQJTMOOMN gave the same map hash (7685322, 38 settlements). The modern engine gives a different, also
+# stable map for lfoj (9097029, 39): an engine divergence, reported to the modern-engine session.
 set -u
 out=$1 wp=$2; shift 2
 names=${*:-lfoj fewer factions9}

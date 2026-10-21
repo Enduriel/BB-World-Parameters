@@ -4,7 +4,7 @@
 	Version = "1.0.1"
 }
 ::WorldParameters.MH <- ::Hooks.register(::WorldParameters.ID, ::WorldParameters.Version, ::WorldParameters.Name);
-::WorldParameters.MH.require("mod_msu >= 1.3.0");
+::WorldParameters.MH.require("mod_msu >= 1.8.0 [MSU 1.8.0 fixes world map fights between factions with an ID above 31, which extra settlements and noble houses create]");
 ::WorldParameters.MH.conflictWith("mod_legends [Legends uses its own custom world generation system and settings]");
 
 

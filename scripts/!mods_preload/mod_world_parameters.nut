@@ -1,7 +1,19 @@
 ::WorldParameters <- {
 	ID = "mod_world_parameters",
 	Name = "World Parameters",
-	Version = "1.0.1"
+	Version = "1.0.1",
+
+	function toRomanNumeral( _number ) {
+		local numerals = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+		local ret = "";
+		foreach (numeral in numerals) {
+			while (_number >= numeral[0]) {
+				ret += numeral[1];
+				_number -= numeral[0];
+			}
+		}
+		return ret;
+	}
 }
 ::WorldParameters.MH <- ::Hooks.register(::WorldParameters.ID, ::WorldParameters.Version, ::WorldParameters.Name);
 ::WorldParameters.MH.require("mod_msu >= 1.8.0 [MSU 1.8.0 fixes world map fights between factions with an ID above 31, which extra settlements and noble houses create]");

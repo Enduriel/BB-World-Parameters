@@ -1,6 +1,7 @@
 ::WorldParameters.MH.hook("scripts/mapgen/templates/world/worldmap_generator", function(q) {
 	q.WorldParameters_multSettlementGroupAmount <- function( _settlementGroup ) {
 		local allCoastal = true;
+		_settlementGroup.WorldParameters_BaseAmount <- _settlementGroup.Amount;
 
 		foreach (settlementEntry in _settlementGroup.List) {
 			if (!("IsCoastal" in settlementEntry) || !settlementEntry.IsCoastal) {
@@ -33,6 +34,52 @@
 			_settlementGroup.Amount *= ::WorldParameters.Mod.ModSettings.getSetting("MilitarySettlementMult").getValue();
 		} else {
 			_settlementGroup.Amount *= ::WorldParameters.Mod.ModSettings.getSetting("CivilianSettlementMult").getValue();
+		}
+
+		local maxAmount = _settlementGroup.WorldParameters_BaseAmount * ::WorldParameters.MaxCombinedMult;
+		if (_settlementGroup.Amount > maxAmount + 0.001) {
+			::logWarning("World Parameters: the settlement multipliers combine to x" + (_settlementGroup.Amount / _settlementGroup.WorldParameters_BaseAmount) + " for " + ::IO.scriptFilenameByHash(_settlementGroup.__Instance.ClassNameHash) + " and similar settlements, capping it at x" + ::WorldParameters.MaxCombinedMult);
+			_settlementGroup.Amount = maxAmount;
+		}
+	}
+
+	// faction_manager gives every civilian settlement its own faction, created after the arena and before the
+	// city states, noble houses and enemy factions, so each civilian settlement raises all of their IDs.
+	// Count the other factions the way faction_manager creates them.
+	q.WorldParameters_getMaxCivilianSettlements <- function() {
+		local numOtherFactions = 3 + 1; // three reserved slots, the generic enemy
+		if (::Const.DLC.Desert) {
+			numOtherFactions += 1 + ::Const.CityStateArchetypes.len() + 1; // the arena, the city states, the nomads
+		}
+		numOtherFactions += ::WorldParameters.Mod.ModSettings.getSetting("NumFactions").getValue(); // noble houses
+		numOtherFactions += 1 + (::Const.DLC.Wildmen ? 1 : 0) + 4; // bandits, barbarians, orcs, goblins, undead, zombies
+		return ::WorldParameters.MaxFactions - numOtherFactions;
+	}
+
+	q.WorldParameters_capCivilianSettlements <- function( _settlementGroups ) {
+		local civilianGroups = _settlementGroups.filter(@(_, _g) !_g.__Instance.isMilitary() && !_g.__Instance.isSouthern());
+		local numCivilian = 0;
+		foreach (settlementGroup in civilianGroups) {
+			numCivilian += settlementGroup.Amount;
+		}
+		local maxCivilian = this.WorldParameters_getMaxCivilianSettlements();
+		if (numCivilian <= maxCivilian) {
+			return;
+		}
+
+		::logWarning("World Parameters: the settings ask for " + numCivilian + " villages, but more than " + maxCivilian + " would give factions an ID of " + ::WorldParameters.MaxFactions + " or more, which breaks battles. Generating at most " + maxCivilian + " villages.");
+		// take villages from the group furthest above its vanilla amount, to keep the proportions the settings ask for
+		for (; numCivilian > maxCivilian; --numCivilian) {
+			local largest = null;
+			local largestRatio = 0.0;
+			foreach (settlementGroup in civilianGroups) {
+				local ratio = settlementGroup.Amount * 1.0 / ::Math.max(1, settlementGroup.WorldParameters_BaseAmount);
+				if (settlementGroup.Amount > 0 && (largest == null || ratio > largestRatio)) {
+					largest = settlementGroup;
+					largestRatio = ratio;
+				}
+			}
+			--largest.Amount;
 		}
 	}
 
@@ -91,6 +138,7 @@
 				roll.Amount += 1;
 			}
 		}
+		this.WorldParameters_capCivilianSettlements(settlementGroups);
 		::Const.World.Settlements.Master = settlementGroups;
 		local ret = __original(_rect);
 		this.WorldParameters_generateAdditionalSoutherns(__original, settlementGroups, _rect)

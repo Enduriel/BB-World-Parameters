@@ -52,4 +52,13 @@
 		::Const.FactionArchetypes = archetypeLists;
 		return ret;
 	}
+
+	q.createFactions = @(__original) function() {
+		__original();
+		local maxID = this.m.Factions.len() - 1;
+		::logInfo("World Parameters: " + this.m.Factions.len() + " factions, the highest faction ID is " + maxID);
+		if (maxID >= ::WorldParameters.MaxFactions) {
+			::logWarning("World Parameters: the highest faction ID is " + maxID + ". Battles with factions of ID " + ::WorldParameters.MaxFactions + " or more may break zones of control. Another mod may be adding factions.");
+		}
+	}
 })

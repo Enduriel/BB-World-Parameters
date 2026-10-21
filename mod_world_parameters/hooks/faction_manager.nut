@@ -48,7 +48,13 @@
 			::Const.FactionArchetypes = this.WorldParameters_generateMoreFactions(archetypeLists, numFactions);
 		}
 
-		local ret = __original();
+		local ret;
+		try {
+			ret = __original();
+		} catch (error) {
+			::Const.FactionArchetypes = archetypeLists;
+			throw error;
+		}
 		::Const.FactionArchetypes = archetypeLists;
 		return ret;
 	}

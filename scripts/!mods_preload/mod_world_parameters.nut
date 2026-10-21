@@ -4,6 +4,14 @@
 	Version = "1.0.1",
 	// the original game's battles hold factions with IDs 0 to 63, a faction with a higher ID breaks zones of control
 	MaxFactions = 64,
+	// why the last campaign start failed, for the message the player gets back in the main menu
+	WorldgenFailure = null,
+
+	// abort worldgen with a message for the player, see hooks/world_state.nut
+	function failWorldgen( _message ) {
+		this.WorldgenFailure = _message;
+		throw "World Parameters: " + _message;
+	}
 
 	function toRomanNumeral( _number ) {
 		local numerals = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];

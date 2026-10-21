@@ -92,11 +92,29 @@
 			}
 		}
 		::Const.World.Settlements.Master = settlementGroups;
-		local ret = __original(_rect);
-		this.WorldParameters_generateAdditionalSoutherns(__original, settlementGroups, _rect)
+		local ret;
+		try {
+			ret = __original(_rect);
+			this.WorldParameters_generateAdditionalSoutherns(__original, settlementGroups, _rect)
+		} catch (error) {
+			::Const.World.Settlements.Master = oldSettlementGroups;
+			throw error;
+		}
 
 		::Const.World.Settlements.Master = oldSettlementGroups;
+		this.WorldParameters_checkNobleHouseFortresses();
 		return ret;
+	}
+
+	// faction_manager.assignSettlementsToNobleHouses gives each noble house a military settlement as its
+	// fortress and throws when there are too few. Villages are placed before military settlements, so with
+	// many villages and little spacing the map can be full before every noble house has one.
+	q.WorldParameters_checkNobleHouseFortresses <- function() {
+		local numNobleHouses = ::WorldParameters.Mod.ModSettings.getSetting("NumFactions").getValue();
+		local numMilitary = ::World.EntityManager.getSettlements().filter(@(_, _s) _s.isMilitary()).len();
+		if (numMilitary < numNobleHouses) {
+			::WorldParameters.failWorldgen(format("There is no room left for the noble houses' fortresses: each of the %i noble houses needs a military settlement, but only %i fit on the map, because the settlements placed before them (villages first) filled it. Lower the settlement multipliers, above all for villages, lower the Minimum Spacing Between Settlements, or choose fewer factions.", numNobleHouses, numMilitary));
+		}
 	}
 
 	q.WorldParameters_generateAdditionalSoutherns <- function( _original, _settlementGroups, _rect ) {
@@ -128,7 +146,12 @@
 				}
 				return rand(_min, _max);
 			}
-			_original(_rect);
+			try {
+				_original(_rect);
+			} catch (error) {
+				::Math.rand = rand;
+				throw error;
+			}
 		}
 		numSouthern = this.WorldParameters_getNumSouthern();
 		if (numSouthern < minSouthern) {
@@ -201,7 +224,12 @@
 				}
 			}
 		}
-		__original(_rect);
+		try {
+			__original(_rect);
+		} catch (error) {
+			::Math.rand = rand;
+			throw error;
+		}
 		::Math.rand = rand;
 	}
 });

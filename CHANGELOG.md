@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-21
+
 - Now requires MSU 1.8.0 or later. Older MSU versions broke world map fights on maps with extra settlements or noble houses: weak parties won, both sides died or fights never ended, and saves stopped loading. A save made while such a fight was running may stay broken; load an earlier one.
 - Fixed world generation never finishing when a settlement type ran out of names. Such settlements now reuse a name with a numeral, e.g. "Hohenfurt II".
 - Fixed the campaign start getting stuck on the loading screen at high settlement spacing or with forced coastal city states.

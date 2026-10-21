@@ -1,7 +1,7 @@
 ::WorldParameters <- {
 	ID = "mod_world_parameters",
 	Name = "World Parameters",
-	Version = "1.0.1",
+	Version = "1.1.0",
 	// the original game's battles hold factions with IDs 0 to 63, a faction with a higher ID breaks zones of control
 	MaxFactions = 64,
 	// why the last campaign start failed, for the message the player gets back in the main menu

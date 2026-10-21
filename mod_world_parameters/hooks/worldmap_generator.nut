@@ -147,6 +147,44 @@
 		return numSouthern;
 	}
 
+	// vanilla's guaranteeAllBuildingsInSettlements picks from an empty candidate list and throws when a building
+	// exists fewer than twice and no other settlement can take it, which aborts the campaign start.
+	// Mark such buildings as present for the call, so vanilla skips them, then restore the counts.
+	q.guaranteeAllBuildingsInSettlements = @(__original) function() {
+		local settlements = ::World.EntityManager.getSettlements();
+		local buildings = [
+			{ Counter = "Fletchers", ID = "building.fletcher", isCandidate = @(_s) _s.getSize() >= 2 },
+			{ Counter = "Temples", ID = "building.temple", isCandidate = @(_s) _s.getSize() >= 2 },
+			{ Counter = "Barbers", ID = "building.barber", isCandidate = @(_s) _s.getSize() >= 2 && !_s.isMilitary() },
+			{ Counter = "Kennels", ID = "building.kennel", isCandidate = @(_s) _s.isMilitary() },
+			{ Counter = "Taxidermists", ID = "building.taxidermist", isCandidate = @(_s) !_s.isMilitary() }
+		];
+		local skipped = {};
+		foreach (building in buildings) {
+			local count = ::Const.World.Buildings[building.Counter];
+			if (count >= 2 || (building.Counter == "Taxidermists" && !::Const.DLC.Unhold)) {
+				continue;
+			}
+			local hasCandidate = false;
+			foreach (settlement in settlements) {
+				if (building.isCandidate(settlement) && settlement.hasFreeBuildingSlot() && !settlement.hasBuilding(building.ID)) {
+					hasCandidate = true;
+					break;
+				}
+			}
+			if (!hasCandidate) {
+				::logWarning("World Parameters: no settlement has room for another " + building.ID + " (" + count + " placed), skipping it");
+				skipped[building.Counter] <- count;
+				::Const.World.Buildings[building.Counter] = 2;
+			}
+		}
+
+		__original();
+		foreach (counter, count in skipped) {
+			::Const.World.Buildings[counter] = count;
+		}
+	}
+
 	q.buildLandAndSea = @(__original) function( _rect ) {
 		local rand = ::Math.rand;
 		local count = 0;

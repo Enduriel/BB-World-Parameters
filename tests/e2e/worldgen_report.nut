@@ -64,3 +64,27 @@ p("settlement names", function() {
 	names.sort();
 	return names.reduce(@(_a, _b) _a + "," + _b);
 });
+
+// A fingerprint of the map, for checking that the same seed and settings give the same map every run
+// (determinism.sh): every settlement's name and tile, and every faction's name, in a fixed order.
+// "map hash" is short enough for any log line; "map" is the full text, through ::ClaudeProbe.out when
+// it exists (the original's log cuts lines at about 3000 bytes).
+local function hash( _text ) {
+	local h = 0;
+	foreach (c in _text) h = (h * 31 + c) % 16777213; // stays below 2^31, no overflow
+	return h;
+}
+local map = [];
+foreach (s in settlements) {
+	local tile = s.getTile();
+	map.push(s.getName() + "@" + tile.SquareCoords.X + "," + tile.SquareCoords.Y);
+}
+map.sort();
+local factions = [];
+foreach (f in ::World.FactionManager.m.Factions) {
+	if (f != null) factions.push(f.getID() + ":" + f.getName());
+}
+local mapText = map.reduce(@(_a, _b) _a + ";" + _b) + "|" + factions.reduce(@(_a, _b) _a + ";" + _b);
+p("map hash", @() hash(mapText));
+if ("ClaudeProbe" in ::getroottable()) ::ClaudeProbe.out("map", mapText);
+else ::logInfo("PROBE map = " + mapText);

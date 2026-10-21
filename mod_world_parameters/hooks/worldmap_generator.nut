@@ -102,9 +102,17 @@
 	q.WorldParameters_generateAdditionalSoutherns <- function( _original, _settlementGroups, _rect ) {
 		local southernGroups = _settlementGroups.filter(@(_, _g) _g.__Instance.isSouthern());
 		::Const.World.Settlements.Master = southernGroups;
+		local minSouthern = ::WorldParameters.Mod.ModSettings.getSetting("MinSouthern").getValue();
+		local numSouthern;
 		for (local i = 0; i < 100; ++i) {
-			if (this.WorldParameters_getNumSouthern() >= ::WorldParameters.Mod.ModSettings.getSetting("MinSouthern").getValue()) {
+			numSouthern = this.WorldParameters_getNumSouthern();
+			if (numSouthern >= minSouthern) {
 				break;
+			}
+			// place only the missing city states: there are only three city state factions and three
+			// city state names, and vanilla never finishes naming a fourth city state
+			foreach (southernGroup in southernGroups) {
+				southernGroup.Amount = minSouthern - numSouthern;
 			}
 			local rand = ::Math.rand;
 			local climbNext = false;
@@ -121,6 +129,10 @@
 				return rand(_min, _max);
 			}
 			_original(_rect);
+		}
+		numSouthern = this.WorldParameters_getNumSouthern();
+		if (numSouthern < minSouthern) {
+			::logWarning("World Parameters: placed only " + numSouthern + " of the minimum " + minSouthern + " southern city states; lower the southern city state spacing to fit more");
 		}
 	}
 

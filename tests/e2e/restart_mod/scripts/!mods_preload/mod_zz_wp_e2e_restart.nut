@@ -58,6 +58,7 @@
 	}
 
 	function setUpCycle() {
+		this.resetWorldParametersSettings(); // no value MSU loaded from a stored MSU#*.sav may leak in
 		local g = @(id, v) ::WorldParameters.Mod.ModSettings.getSetting(id).set(v, false, false);
 		foreach (id in ["GlobalSettlementMult", "LargeSettlementMult", "MediumSettlementMult", "SmallSettlementMult", "CoastalSettlementMult", "CivilianSettlementMult", "MilitarySettlementMult"]) g(id, 5.0);
 		g("NumFactions", 9); g("MinSouthern", 3); g("SettlementMinDistance", 6);

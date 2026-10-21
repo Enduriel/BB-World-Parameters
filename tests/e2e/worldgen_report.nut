@@ -1,6 +1,9 @@
 // What worldgen produced, once the campaign has started. Reproduces the worldgen side of the
 // world_parameters reports (triage/2026-10.md section 4: worldgen never finishes, #159625915, #172052138)
-// and checks the caps that keep faction IDs below 64.
+// and reports the highest faction ID: every extra village and noble house raises it, and the original
+// game's battles break with a faction ID of 64 or more. The mod only warns about that in the log
+// ("World Parameters: the highest faction ID is N, which is 64 or more ..."), so check that the warning
+// is there whenever PROBE highest faction id below 64 = false.
 //
 // Mods: mod_msu (>= 1.8.0) and a world_parameters build. Settings: one of settings/*.nut.
 // - Original game: bb-game-probe run_probe.py worldgen_report.nut --mode campaign --setup settings/X.nut
@@ -8,7 +11,6 @@
 //
 // A passing run (any settings) prints, among others:
 //   PROBE wp loaded = true
-//   PROBE highest faction id below 64 = true
 //   PROBE city states = 3 or fewer, PROBE city states without faction = 0
 //   PROBE duplicate settlement names = 0
 // Reaching these lines at all means worldgen finished without hanging or throwing.

@@ -40,8 +40,11 @@
 		local oldSettlementGroups = ::Const.World.Settlements.Master;
 		local settlementGroups = ::MSU.deepClone(oldSettlementGroups);
 
-		local extraContainer = ::MSU.Class.WeightedContainer();
-		local total = 0.0; // weighted container should probably have getTotal be public
+		// [settlement group or null, weight] in the groups' order. Not MSU's WeightedContainer: that keys a table
+		// by its items, and Squirrel orders table keys by memory address, so the extra settlements went to
+		// different groups from run to run with the same seed.
+		local extras = [];
+		local total = 0.0;
 		local militaries = [];
 		local numMilitary = 0;
 		foreach (settlementGroup in settlementGroups) {
@@ -61,7 +64,7 @@
 			}
 
 			local remainingAmount = settlementGroup.Amount - ::Math.floor(settlementGroup.Amount);
-			extraContainer.add(settlementGroup, remainingAmount);
+			extras.push([settlementGroup, remainingAmount]);
 			total += remainingAmount;
 			settlementGroup.Amount = ::Math.floor(settlementGroup.Amount);
 			// if (::WorldParameters.Mod.ModSettings.getSetting("ForceCoastalSouthern").getValue() && settlementGroup.__Instance.isSouthern()) {
@@ -82,13 +85,13 @@
 			}
 		}
 
-		extraContainer.add(0, ::Math.ceil(total) - total);
+		extras.push([null, ::Math.ceil(total) - total]);
 
 		for (local i = 0; i < total; ++i) {
-			local roll = extraContainer.roll();
-			extraContainer.remove(roll);
-			if (roll != 0) {
-				roll.Amount += 1;
+			local index = ::WorldParameters.rollWeightedIndex(extras);
+			local settlementGroup = extras.remove(index)[0];
+			if (settlementGroup != null) {
+				settlementGroup.Amount += 1;
 			}
 		}
 		::Const.World.Settlements.Master = settlementGroups;

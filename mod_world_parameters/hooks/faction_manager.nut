@@ -1,38 +1,28 @@
 ::WorldParameters.MH.hook("scripts/factions/faction_manager", function(q) {
+	// These pick from arrays, not from MSU's WeightedContainer: that keys a table by its items, and Squirrel
+	// orders table and array keys by memory address, so which archetype a roll picked changed from run to run
+	// with the same seed. Every archetype has the same weight, so a uniform pick is the same distribution.
 	q.WorldParameters_generateFewerFactions <- function( _archetypeLists, _numFactions ) {
-		local weightedContainer = ::MSU.Class.WeightedContainer();
-		weightedContainer.addMany(1, _archetypeLists);
+		local remaining = clone _archetypeLists;
 		local newArchetypeLists = [];
 		for (local i = 0; i < _numFactions; ++i) {
-			local roll = weightedContainer.roll();
-			weightedContainer.remove(roll);
-			newArchetypeLists.push(roll);
+			newArchetypeLists.push(remaining.remove(::Math.rand(0, remaining.len() - 1)));
 		}
 		return newArchetypeLists;
 	}
 
 	q.WorldParameters_generateMoreFactions <- function( _archetypeLists, _numFactions ) {
-		local weightedContainers = [];
+		local remaining = [];
 		local newArchetypesFlattened = [];
 		foreach (archetypeList in _archetypeLists) {
-			local weightedContainer = ::MSU.Class.WeightedContainer();
-			weightedContainer.addMany(1, archetypeList);
-			weightedContainers.push(weightedContainer);
+			local archetypes = clone archetypeList;
 			// guarantee 1 from each list
-			local roll = weightedContainer.roll();
-			weightedContainer.remove(roll);
-			newArchetypesFlattened.push(roll);
-		}
-
-		local mergedContainer = ::MSU.Class.WeightedContainer();
-		foreach (weightedContainer in weightedContainers) {
-			mergedContainer.merge(weightedContainer);
+			newArchetypesFlattened.push(archetypes.remove(::Math.rand(0, archetypes.len() - 1)));
+			remaining.extend(archetypes);
 		}
 
 		for (local i = 0; i < (_numFactions - _archetypeLists.len()); ++i) {
-			local roll = mergedContainer.roll()
-			mergedContainer.remove(roll);
-			newArchetypesFlattened.push(roll);
+			newArchetypesFlattened.push(remaining.remove(::Math.rand(0, remaining.len() - 1)));
 		}
 
 		local newArchetypesLists = newArchetypesFlattened.map(@(_archetype) [_archetype]);

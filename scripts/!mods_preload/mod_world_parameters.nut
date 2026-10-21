@@ -13,6 +13,23 @@
 		throw "World Parameters: " + _message;
 	}
 
+	// The index of a weighted random pick from an array of [item, weight] pairs, walked in array order, so the
+	// pick depends only on the random seed. Rolls the way MSU's WeightedContainer.roll does.
+	function rollWeightedIndex( _pairs ) {
+		local total = 0.0;
+		foreach (pair in _pairs) {
+			total += pair[1];
+		}
+		local roll = ::MSU.Math.randf(0.0, total);
+		foreach (i, pair in _pairs) {
+			if (roll <= pair[1] && pair[1] != 0.0) {
+				return i;
+			}
+			roll -= pair[1];
+		}
+		return null;
+	}
+
 	function toRomanNumeral( _number ) {
 		local numerals = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
 		local ret = "";

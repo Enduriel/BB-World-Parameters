@@ -4,8 +4,6 @@
 	Version = "1.0.1",
 	// the original game's battles hold factions with IDs 0 to 63, a faction with a higher ID breaks zones of control
 	MaxFactions = 64,
-	// the settlement multipliers multiply each other, this caps their product for each settlement type
-	MaxCombinedMult = 5.0,
 
 	function toRomanNumeral( _number ) {
 		local numerals = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
@@ -40,7 +38,7 @@
 
 	local settings = [];
 
-	settings.push(page.addRangeSetting("NumFactions", 3, 2, 9, 1, "Number of Factions", "The number of noble houses. Each one raises the faction ID of every enemy faction, which lowers how many villages fit under the village cap."));
+	settings.push(page.addRangeSetting("NumFactions", 3, 2, 9, 1, "Number of Factions"));
 	settings.push(page.addRangeSetting("MinSouthern", 1, 0, 3, 1, "Minimum Southern City States", "If worldgen places fewer city states than this, it tries again for the missing ones only. There are never more than 3."));
 	settings.push(page.addRangeSetting("SettlementMinDistance", 12, 6, 18, 1, "Minimum Spacing Between Settlements"));
 	settings.push(page.addRangeSetting("SouthernMinDistance", 24, 6, 36, 1, "Minimum Spacing Between Southern City States"));
@@ -49,13 +47,12 @@
 
 
 	local settlementsPage = ::WorldParameters.Mod.ModSettings.addPage("Settlement Multipliers");
-	settings.push(settlementsPage.addTitle("MultiplierCaps", "Caps", "The multipliers multiply each other, but each settlement type is capped at x5 its vanilla count. Villages are capped so that no faction ID reaches 64 (40 to 47 villages with all DLC, fewer with more noble houses), because each village gets its own faction and higher IDs break battles. Worldgen logs a warning when a cap applies."));
-	settings.push(settlementsPage.addRangeSetting("GlobalSettlementMult", 1.0, 0.0, 5.0, 0.1, "Settlement Count Multiplier", "Multiplies the count of every non-southern settlement type, together with the other multipliers. The combined multiplier is capped at x5. Villages are capped so that no faction ID reaches 64 (40 to 47 villages with all DLC, fewer with more noble houses), because each village gets its own faction and higher IDs break battles."));
+	settings.push(settlementsPage.addRangeSetting("GlobalSettlementMult", 1.0, 0.0, 5.0, 0.1, "Settlement Count Multiplier"));
 	settings.push(settlementsPage.addRangeSetting("LargeSettlementMult", 1.0, 0.0, 5.0, 0.1, "Large Settlement Multiplier"));
 	settings.push(settlementsPage.addRangeSetting("MediumSettlementMult", 1.0, 0.0, 5.0, 0.1, "Medium Settlement Multiplier"));
 	settings.push(settlementsPage.addRangeSetting("SmallSettlementMult", 1.0, 0.0, 5.0, 0.1, "Small Settlement Multiplier"));
 	settings.push(settlementsPage.addRangeSetting("CoastalSettlementMult", 1.0, 0.0, 5.0, 0.1, "Coastal Settlement Multiplier"));
-	settings.push(settlementsPage.addRangeSetting("CivilianSettlementMult", 1.0, 0.0, 5.0, 0.1, "Civilian Settlement Multiplier", "Multiplies the count of villages. The combined multiplier is capped at x5. Villages are capped so that no faction ID reaches 64 (40 to 47 villages with all DLC, fewer with more noble houses), because each village gets its own faction and higher IDs break battles."));
+	settings.push(settlementsPage.addRangeSetting("CivilianSettlementMult", 1.0, 0.0, 5.0, 0.1, "Civilian Settlement Multiplier"));
 	settings.push(settlementsPage.addRangeSetting("MilitarySettlementMult", 1.0, 0.0, 5.0, 0.1, "Military Settlement Multiplier"));
 
 	foreach (setting in settings) {

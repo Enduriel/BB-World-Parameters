@@ -12,7 +12,7 @@
 //   2. the default settings plus a settlement group whose script doesn't exist: an error World Parameters
 //      doesn't predict, the generic message with the error text;
 //   3. the default settings: a normal campaign;
-// - once the world's loading screen is gone: whether it runs normally, then ::ClaudeProbe.done() when present.
+// - once the world's loading screen is gone: whether it runs normally, then ::BbProbe.done() when present.
 // setUpCycle() applies step 1. The first campaign is started by restart_failed_worldgen.nut (original
 // game, menu mode) or by world_fights itself (modern engine, --settings settings/restart_cycle.nut).
 
@@ -35,7 +35,7 @@
 
 	function done() {
 		this.p("restart test", "done");
-		if ("ClaudeProbe" in ::getroottable()) ::ClaudeProbe.done();
+		if ("BbProbe" in ::getroottable()) ::BbProbe.done();
 	}
 
 	function startCampaign( _seed ) {

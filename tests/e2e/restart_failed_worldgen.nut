@@ -25,6 +25,6 @@
 // There is no room left for the noble houses' fortresses ..." for start 1 and "... Generating the world
 // failed with the error ..." (the missing script) for start 2.
 
-::ClaudeProbe.DeferDone = true;
+::BbProbe.DeferDone = true;
 ::WPE2E.setUpCycle();
 ::WPE2E.startCampaign("VUQJTMOOMN");

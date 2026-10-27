@@ -14,7 +14,7 @@
 set -u
 out=$1 name=$2 msu=$3 wp=$4; shift 4
 here=$(cd "$(dirname "$0")" && pwd)
-engine=/home/end/dev/battle_brothers/modern_engine/modern_bb_engine
+engine=/home/end/dev/battle_brothers/modern_engine/modern-bb-engine/modern_bb_engine
 export CARGO_TARGET_DIR=/home/end/dev/battle_brothers/scratch-targets/llm-mods
 mkdir -p "$out"
 (cd "$engine" && cargo build -q --release -p bb-engine --example world_fights) || exit 1
